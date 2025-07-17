@@ -1,7 +1,6 @@
 pipeline {
   agent any
 
-  
   environment {
     AWS_REGION = "ap-south-1"
     IMAGE_NAME = "nodejs-app"
@@ -15,39 +14,28 @@ pipeline {
       }
     }
 
+    stage('Verify Node.js & NPM') {
+      steps {
+        sh 'node -v && npm -v'
+      }
+    }
+
     stage('Install Dependencies') {
       steps {
-        sh '''
-          if [ -f pnpm-lock.yaml ]; then
-            npm install -g pnpm
-            pnpm install
-          else
-            npm install
-          fi
-        '''
+        sh 'npm install'
       }
     }
 
     stage('Run Tests') {
       steps {
-        sh '''
-          if [ -f pnpm-lock.yaml ]; then
-            pnpm test || echo "No test script defined or test failed"
-          else
-            npm test || echo "No test script defined or test failed"
-          fi
-        '''
+        // skip errors for now if no test script
+        sh 'npm test || echo "Tests skipped or failed, continuing..."'
       }
     }
 
     stage('Build Docker Image') {
       steps {
         sh '''
-          if [ ! -f Dockerfile ]; then
-            echo "❌ ERROR: Dockerfile not found!"
-            exit 1
-          fi
-
           docker build -t $IMAGE_NAME .
           docker tag $IMAGE_NAME:latest $ECR_URL/$IMAGE_NAME:latest
         '''
@@ -67,17 +55,17 @@ pipeline {
 
     stage('Deploy to ECS') {
       steps {
-        echo "🛠️ Deploying to ECS... (Terraform or AWS CLI commands go here)"
+        echo "✅ Deploy step goes here — Terraform or AWS CLI"
       }
     }
   }
 
   post {
-    failure {
-      echo "❌ Build failed. Check logs!"
-    }
     success {
-      echo "✅ Build and deployment completed successfully!"
+      echo "🎉 Build and deploy complete!"
+    }
+    failure {
+      echo "❌ Build failed. Fix and retry!"
     }
   }
 }
