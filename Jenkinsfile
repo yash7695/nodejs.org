@@ -1,10 +1,7 @@
 pipeline {
   agent any
 
-  tools {
-    nodejs 'Node-18'  // Make sure this is installed in Jenkins → Manage Jenkins → Global Tool Configuration
-  }
-
+  
   environment {
     AWS_REGION = "ap-south-1"
     IMAGE_NAME = "nodejs-app"
