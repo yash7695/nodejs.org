@@ -14,12 +14,7 @@ pipeline {
       }
     }
 
-    stage('Verify Node.js & NPM') {
-      steps {
-        sh 'node -v && npm -v'
-      }
-    }
-
+  
     stage('Install Dependencies') {
       steps {
         sh 'npm install'
